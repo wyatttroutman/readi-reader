@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from "electron";
 
 function createWindow() {
-  require("./express/app").default;
+  require("./express/server").default;
 
   // Create the browser window.
   const win = new BrowserWindow({
