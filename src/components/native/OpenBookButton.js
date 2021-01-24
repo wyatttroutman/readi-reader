@@ -24,7 +24,7 @@ export default function OpenDirectoryButton() {
     })
       .then((response) => response.json())
       .then((response) => {
-        const { error, id, data } = response;
+        const { error, data } = response;
         if (error) {
           enqueueSnackbar("Failed to imported book.", {
             variant: "error",
@@ -32,7 +32,6 @@ export default function OpenDirectoryButton() {
           throw error;
         }
 
-        console.log(response);
         logBook(data);
         setBook(data);
         enqueueSnackbar(`Imported book: ${data.title}`, {

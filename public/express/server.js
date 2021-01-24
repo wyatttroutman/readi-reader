@@ -124,7 +124,10 @@ server.delete("/book/:id", (req, res, next) => {
       res.status(400).json({ error: err.message });
       return;
     }
-    res.json(book);
+    res.json({
+      message: "success",
+      data: book,
+    });
   });
 });
 

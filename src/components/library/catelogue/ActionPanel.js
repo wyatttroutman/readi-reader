@@ -6,20 +6,51 @@ import LaunchIcon from "@material-ui/icons/Launch";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { IconButton } from "@material-ui/core";
 
-import { useSetRecoilState } from "recoil";
-import { currentBookState } from "../../../recoil/atoms";
+import { useRecoilState, useRecoilCallback } from "recoil";
+import { useInvalidateCache, currentBookState } from "../../../recoil/atoms";
+import { useSnackbar } from "notistack";
 
 export default function ActionPanel({ book }) {
   const history = useHistory();
-  const setBook = useSetRecoilState(currentBookState);
+  const [currentBook, setCurrentBook] = useRecoilState(currentBookState);
+  const { enqueueSnackbar } = useSnackbar();
+  const invalidateCache = useInvalidateCache();
 
   function openBook() {
-    console.log(book);
-    setBook(book);
+    setCurrentBook(book);
     history.push("/reader");
   }
+
+  const deleteBookCallback = useRecoilCallback(() => async () => {
+    await fetch(`http://localhost:5050/book/${book.id}`, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        const { error } = response;
+        if (error) {
+          enqueueSnackbar("Failed to delete book.", {
+            variant: "error",
+          });
+          throw error;
+        }
+
+        if (currentBook.id === book.id) {
+          setCurrentBook(null);
+        }
+        enqueueSnackbar(`Deleted book: ${book.title}`, {
+          variant: "success",
+        });
+        invalidateCache();
+      });
+  });
+
   function deleteBook() {
-    throw "TODO: Implement delete book.";
+    deleteBookCallback();
   }
 
   return (
