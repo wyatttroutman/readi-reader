@@ -27,6 +27,11 @@ export const invalidateCacheState = atom({
   default: 0,
 });
 
+export const currentBookState = atom({
+  key: "currentBookState",
+  default: null,
+});
+
 export const catelogueStateSelector = selector({
   key: "catelogueStateSelector",
   get: async ({ get }) => {
@@ -35,7 +40,24 @@ export const catelogueStateSelector = selector({
     if (response.error) {
       throw response.error;
     }
-    return response.json();
+
+    const json = await response.json();
+    return json.data;
+  },
+});
+
+export const catelogueItemStateSelector = selector({
+  key: "catelogueItemStateSelector",
+  get: async ({ get }) => {
+    const { id } = get(currentBookState);
+
+    if (!id) return null;
+
+    const response = await fetch(`http://localhost:5050/book/${id}`);
+    if (response.error) {
+      throw response.error;
+    }
+    return response.json().data;
   },
 });
 
@@ -53,11 +75,6 @@ export const catelogueBookFirstEntrySelector = selector({
     set(catelogueBookState, [book, ...get(catelogueBookState)]),
 });
 
-export const currentBookState = atom({
-  key: "currentBookState",
-  default:
-    "http://epubtest.org/books/Fundamental-Accessibility-Tests-Basic-Functionality-v1.0.0.epub",
-});
 export const libraryConsoleExpandedState = atom({
   key: "libraryConsoleExpandedState", // unique ID (with respect to other atoms/selectors)
   default: false, // default value (aka initial value)
@@ -93,7 +110,7 @@ export const consoleLogNavigationSelector = selector({
   key: "consoleLogNavigationSelector",
   set: ({ get, set }, text) =>
     set(consoleState, [
-      createConsoleEntry(`Navigating to new route: ${text}.`),
+      createConsoleEntry(`Navigated to new route: ${text}.`),
       ...get(consoleState),
     ]),
 });
@@ -111,7 +128,7 @@ export const consoleLogBookSelector = selector({
   key: "consoleLogBookSelector",
   set: ({ get, set }, book) =>
     set(consoleState, [
-      createConsoleEntry(`Importing book: ${book.title}.`),
+      createConsoleEntry(`Imported book: ${book.title}.`),
       ...get(consoleState),
     ]),
 });

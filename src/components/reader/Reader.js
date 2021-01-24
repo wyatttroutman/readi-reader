@@ -15,14 +15,13 @@ const ReaderContainer = styled.div`
   transition: all 0.6s ease;
 `;
 
-const storage = global.localStorage || null;
-
-export default function Reader(props) {
-  const DEMO_NAME =
-    "Fundamental-Accessibility-Tests-Basic-Functionality-v1.0.0.epub";
-
+export default function Reader() {
   const [location, setLocation] = useState(0);
   const book = useRecoilValue(currentBookState);
+
+  if (!book) return <></>;
+
+  console.log(book);
 
   function onLocationChanged(location) {
     console.log(location);
@@ -32,8 +31,10 @@ export default function Reader(props) {
   return (
     <ReaderContainer>
       <ReactReader
-        url={book}
-        title={DEMO_NAME}
+        url={`http://localhost:5050/book/download/${encodeURIComponent(
+          book.path
+        )}`}
+        title={book.title}
         location={location}
         locationChanged={(location) => onLocationChanged(location)}
       />

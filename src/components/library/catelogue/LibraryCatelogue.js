@@ -147,7 +147,7 @@ export default function LibraryCatelogue() {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const rows = useRecoilValue(catelogueStateSelector);
+  const books = useRecoilValue(catelogueStateSelector);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -157,7 +157,7 @@ export default function LibraryCatelogue() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.title);
+      const newSelecteds = books.map((n) => n.title);
       setSelected(newSelecteds);
       return;
     }
@@ -200,7 +200,7 @@ export default function LibraryCatelogue() {
   const isSelected = (title) => selected.indexOf(title) !== -1;
 
   const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+    rowsPerPage - Math.min(rowsPerPage, books.length - page * rowsPerPage);
 
   return (
     <>
@@ -224,23 +224,23 @@ export default function LibraryCatelogue() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={books.length}
             />
             <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
+              {stableSort(books, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const isItemSelected = isSelected(row.id);
+                .map((book, index) => {
+                  const isItemSelected = isSelected(book.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, book.id)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.id}
+                      key={book.id}
                       selected={isItemSelected}
                     >
                       <TableCell padding="checkbox">
@@ -255,12 +255,12 @@ export default function LibraryCatelogue() {
                         scope="row"
                         padding="none"
                       >
-                        {row.title}
+                        {book.title}
                       </TableCell>
-                      <TableCell align="left">{row.author}</TableCell>
-                      <TableCell align="left">{row.subject}</TableCell>
+                      <TableCell align="left">{book.author}</TableCell>
+                      <TableCell align="left">{book.subject}</TableCell>
                       <TableCell align="right">
-                        <ActionPanel path={row.path} />
+                        <ActionPanel book={book} />
                       </TableCell>
                     </TableRow>
                   );
@@ -276,7 +276,7 @@ export default function LibraryCatelogue() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={books.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}

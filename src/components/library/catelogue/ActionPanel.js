@@ -9,12 +9,13 @@ import { IconButton } from "@material-ui/core";
 import { useSetRecoilState } from "recoil";
 import { currentBookState } from "../../../recoil/atoms";
 
-export default function ActionPanel({ id, path }) {
+export default function ActionPanel({ book }) {
   const history = useHistory();
   const setBook = useSetRecoilState(currentBookState);
 
   function openBook() {
-    setBook(`http://localhost:5050/book/download/${encodeURIComponent(path)}`);
+    console.log(book);
+    setBook(book);
     history.push("/reader");
   }
   function deleteBook() {

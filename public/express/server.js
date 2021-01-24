@@ -16,7 +16,7 @@ server.use(json());
 
 const port = 5050;
 
-function createBookData(
+function createBookObject(
   title,
   author,
   description,
@@ -25,7 +25,18 @@ function createBookData(
   path,
   publishDate
 ) {
-  return [title, author, description, language, subject, path, publishDate];
+  return { title, author, description, language, subject, path, publishDate };
+}
+function createBookData(object) {
+  return [
+    object.title,
+    object.author,
+    object.description,
+    object.language,
+    object.subject,
+    object.path,
+    object.publishDate,
+  ];
 }
 
 server.post("/book", (req, res) => {
@@ -38,7 +49,7 @@ server.post("/book", (req, res) => {
     publishDate,
     path,
   } = req.body;
-  const book = createBookData(
+  const bookObject = createBookObject(
     title,
     author,
     description,
@@ -47,16 +58,17 @@ server.post("/book", (req, res) => {
     path,
     publishDate
   );
+  const bookData = createBookData(bookObject);
 
   // Save book
-  db.run(insertBookQuery, book, function (err, result) {
+  db.run(insertBookQuery, bookData, function (err, result) {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
     }
     res.json({
       message: "success",
-      data: data,
+      data: bookData,
       id: this.lastID,
     });
   });
@@ -77,7 +89,7 @@ server.post("/book/path/:path", (req, res) => {
 
     // Creaate book record
     const { title, creator, description, language, subject } = metadata;
-    const book = createBookData(
+    const bookObject = createBookObject(
       title,
       creator,
       description,
@@ -86,16 +98,17 @@ server.post("/book/path/:path", (req, res) => {
       resolvedPath,
       ""
     );
+    const bookData = createBookData(bookObject);
 
     // Save book
-    db.run(insertBookQuery, book, function (err, result) {
+    db.run(insertBookQuery, bookData, function (err, result) {
       if (err) {
         res.status(400).json({ error: err.message });
         return;
       }
       res.json({
         message: "success",
-        data: book,
+        data: bookObject,
         id: this.lastID,
       });
     });
@@ -122,18 +135,24 @@ server.get("/book", (req, res) => {
       res.status(400).json({ error: err.message });
       return;
     }
-    res.json(books);
+    res.json({
+      message: "success",
+      data: books,
+    });
   });
 });
 
-server.get("/book/:id", (req, res, next) => {
+server.get("/book/:id", (req, res) => {
   var params = [req.params.id];
   db.get(getBookByIdQuery, params, (err, book) => {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
     }
-    res.json(book);
+    res.json({
+      message: "success",
+      data: book,
+    });
   });
 });
 

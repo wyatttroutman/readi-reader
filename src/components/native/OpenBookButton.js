@@ -3,36 +3,50 @@ import OpenFileButton from "./OpenFileButton";
 import { useSetRecoilState, useRecoilCallback } from "recoil";
 import {
   useInvalidateCache,
-  consoleLogFilepathSelector,
   currentBookState,
   consoleLogBookSelector,
 } from "../../recoil/atoms";
+import { useSnackbar } from "notistack";
 
 export default function OpenDirectoryButton() {
-  const logPath = useSetRecoilState(consoleLogFilepathSelector);
   const logBook = useSetRecoilState(consoleLogBookSelector);
   const setBook = useSetRecoilState(currentBookState);
+  const { enqueueSnackbar } = useSnackbar();
   const invalidateCache = useInvalidateCache();
 
-  const addBookCallback = useRecoilCallback(() => async (path) => {
-    const response = await fetch(
-      `http://localhost:5050/book/path/${encodeURIComponent(path)}`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    invalidateCache();
+  const importBookCallback = useRecoilCallback(() => async (path) => {
+    await fetch(`http://localhost:5050/book/path/${encodeURIComponent(path)}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        const { error, id, data } = response;
+        if (error) {
+          enqueueSnackbar("Failed to imported book.", {
+            variant: "error",
+          });
+          throw error;
+        }
+
+        console.log(response);
+        logBook(data);
+        setBook(data);
+        enqueueSnackbar(`Imported book: ${data.title}`, {
+          variant: "success",
+        });
+        invalidateCache();
+      });
   });
 
   function openFileCallback(result) {
-    const path = result.filePaths[0];
-    logPath(path);
-    setBook(`http://localhost:5050/book/download/${encodeURIComponent(path)}`);
-    addBookCallback(encodeURIComponent(path));
+    result &&
+      result.filePaths &&
+      result.filePaths[0] &&
+      importBookCallback(encodeURIComponent(result.filePaths[0]));
   }
 
   return (
