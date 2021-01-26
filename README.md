@@ -2,6 +2,8 @@
 
 A proof of concept book catelogue management and reading tool. Built using React.js, Recoil, Electron, Node.js, Express, and SQLite.
 
+![Alt Text](https://i.imgur.com/6SdY9Vs.gif)
+
 ## Background
 
 I have always been a Calibre user, using it to manage my e-books and load them onto my devices. However, I always found the UI to be very lacking from a UX perspective. I decided to make my own library management tool, challenging myself to use frameworks and tools that I have minimal experience with. This application represents my first attempts at using Recoil, Electron, Express, and SQLite.
